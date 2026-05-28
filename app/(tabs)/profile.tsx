@@ -1,9 +1,8 @@
-// app/(tabs)/profile.tsx
-import { useTripContext } from '@/context/TripContext';
+import { useTrips } from '@/context/TripContext';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function ProfileScreen() {
-  const { trips } = useTripContext();
+  const { trips } = useTrips();
 
   const tripCount = trips.length;
   const avgRating =
@@ -14,7 +13,6 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Avatar */}
       <View style={styles.avatar}>
         <Text style={styles.initials}>EA</Text>
       </View>
@@ -22,7 +20,6 @@ export default function ProfileScreen() {
       <Text style={styles.name}>Emre Arac</Text>
       <Text style={styles.joinDate}>Joined March 2026</Text>
 
-      {/* Stats */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{tripCount}</Text>

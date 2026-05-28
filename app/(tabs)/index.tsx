@@ -1,13 +1,20 @@
-// app/(tabs)/index.tsx
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { TripCard } from '@/components/TripCard';
-import { useTripContext } from '@/context/TripContext';
+import { useTrips } from '@/context/TripContext';
 import { Link, useRouter } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
-  const { trips } = useTripContext();
+  const { trips, loading } = useTrips();
   const router = useRouter();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0A1628' }}>
+        <ActivityIndicator size="large" color="#61DAFB" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -32,7 +39,6 @@ export default function HomeScreen() {
         }
       />
 
-      {/* FAB butonu */}
       <Pressable style={styles.fab} onPress={() => router.push('/add-trip')}>
         <Text style={styles.fabText}>+</Text>
       </Pressable>

@@ -1,20 +1,20 @@
 // app/trip/gallery/[id].tsx
-import { useTripContext } from '@/context/TripContext';
+import { useTrips } from '@/context/TripContext';
 import { deleteImage, saveImageToTrip } from '@/utils/imageStorage';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    FlatList,
-    Image,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -22,7 +22,7 @@ const ITEM_SIZE = (width - 16) / 3;
 
 export default function GalleryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { trips, updateTrip } = useTripContext();
+  const { trips, updateTrip } = useTrips();
   const trip = trips.find((t) => t.id === id);
 
   const [selectedUri, setSelectedUri] = useState<string | null>(null);

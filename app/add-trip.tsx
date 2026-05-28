@@ -1,11 +1,11 @@
 // app/add-trip.tsx
 import AddTripForm from '@/components/AddTripForm';
-import { useTripContext } from '@/context/TripContext';
+import { useTrips } from '@/context/TripContext';
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 export default function AddTripScreen() {
-  const { addTrip } = useTripContext();
+  const { addTrip } = useTrips();
   const router = useRouter();
 
   return (

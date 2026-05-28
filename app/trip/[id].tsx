@@ -1,14 +1,14 @@
 // app/trip/[id].tsx
 import RatingStars from '@/components/RatingStars';
-import { useTripContext } from '@/context/TripContext';
+import { useTrips } from '@/context/TripContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { trips } = useTripContext();
+  const { trips, deleteTrip } = useTrips();
   const router = useRouter();
   const { isFavorite, toggleFavorite, isLoading } = useFavorites();
 
@@ -24,6 +24,22 @@ export default function TripDetail() {
   }
 
   const galleryCount = trip.galleryUris?.length ?? 0;
+
+  const handleDelete = async () => {
+    await deleteTrip(id);
+    router.back();
+  };
+
+  const confirmDelete = () => {
+    Alert.alert(
+      'Delete Trip',
+      'This action cannot be undone. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: handleDelete },
+      ]
+    );
+  };
 
   return (
     <>
@@ -47,7 +63,6 @@ export default function TripDetail() {
       />
 
       <ScrollView style={styles.container}>
-        {/* Hero image */}
         {trip.imageUri ? (
           <Image
             source={{ uri: trip.imageUri }}
@@ -85,6 +100,20 @@ export default function TripDetail() {
               <Text style={styles.galleryBtnText}>Gallery ({galleryCount})</Text>
             </Pressable>
           </Link>
+
+          {/* Edit button */}
+          <Link href={{ pathname: '/trip/edit/[id]', params: { id: trip.id } }} asChild>
+            <Pressable style={styles.editButton}>
+              <Ionicons name="create-outline" size={20} color="#0A1628" />
+              <Text style={styles.editButtonText}>Edit trip</Text>
+            </Pressable>
+          </Link>
+
+          {/* Delete button */}
+          <Pressable style={styles.deleteButton} onPress={confirmDelete}>
+            <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.deleteButtonText}>Delete trip</Text>
+          </Pressable>
 
           {/* Back button */}
           <Pressable style={styles.backButton} onPress={() => router.back()}>
@@ -158,14 +187,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  backButton: {
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     backgroundColor: '#61DAFB',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  editButtonText: {
+    color: '#0A1628',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#E94560',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  backButton: {
+    backgroundColor: '#1A2744',
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
   },
   backButtonText: {
-    color: '#0A1628',
+    color: '#61DAFB',
     fontWeight: 'bold',
     fontSize: 16,
   },
