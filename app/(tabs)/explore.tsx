@@ -1,33 +1,38 @@
-// app/(tabs)/explore.tsx
-import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { DestinationCard } from "@/components/DestinationCard";
+import { FlatList, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function ExploreScreen() {
+const POPULAR = [
+  "Tokyo",
+  "Lisbon",
+  "Reykjavik",
+  "Bali",
+  "Cape Town",
+  "Kyoto",
+  "Marrakech",
+  "Patagonia",
+];
+
+export default function Explore() {
   return (
-    <View style={styles.container}>
-      <Ionicons name="compass" size={64} color="#61DAFB" />
-      <Text style={styles.title}>Discover new places</Text>
-      <Text style={styles.subtitle}>Coming soon...</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={POPULAR}
+        keyExtractor={(city) => city}
+        renderItem={({ item }) => <DestinationCard city={item} />}
+        contentContainerStyle={styles.list}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1628',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 12,
+    backgroundColor: "#000",
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginTop: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8B95A5',
+  list: {
+    padding: 16,
+    gap: 16,
   },
 });

@@ -1,10 +1,25 @@
 // app/trip/[id].tsx
+import { CountryCard } from '@/components/CountryCard';
+import { ErrorView } from '@/components/ErrorView';
 import RatingStars from '@/components/RatingStars';
+import { UNSPLASH_ACCESS_KEY, UNSPLASH_BASE_URL } from '@/constants/api';
 import { useTrips } from '@/context/TripContext';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useFetch } from '@/hooks/useFetch';
+import { UnsplashResponse } from '@/types/unsplash';
+import { extractCountry } from '@/utils/destination';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -15,14 +30,31 @@ export default function TripDetail() {
   const trip = trips.find((t) => t.id === id);
   const favorite = trip ? isFavorite(trip.id) : false;
 
+  const unsplashUrl = trip
+    ? `${UNSPLASH_BASE_URL}/search/photos?query=${encodeURIComponent(trip.destination)}&per_page=1`
+    : '';
+
+  const { data: photoData, loading: photoLoading } = useFetch<UnsplashResponse>(
+    unsplashUrl,
+    trip
+      ? { headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` } }
+      : undefined
+  );
+
   if (!trip) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Trip not found.</Text>
+        <ErrorView
+          message="Trip not found."
+          onRetry={() => router.back()}
+          retryLabel="Go back"
+        />
       </View>
     );
   }
 
+  const heroUri = photoData?.results?.[0]?.urls?.regular ?? trip.imageUri;
+  const photoCredit = photoData?.results?.[0]?.user?.name;
   const galleryCount = trip.galleryUris?.length ?? 0;
 
   const handleDelete = async () => {
@@ -63,18 +95,38 @@ export default function TripDetail() {
       />
 
       <ScrollView style={styles.container}>
-        {trip.imageUri ? (
-          <Image
-            source={{ uri: trip.imageUri }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.placeholder}>
-            <Ionicons name="image-outline" size={64} color="#4A6FA5" />
-            <Text style={styles.placeholderText}>No photo</Text>
-          </View>
+        {/* Hero Photo */}
+        <View style={styles.heroContainer}>
+          {heroUri ? (
+            <Image
+              source={{ uri: heroUri }}
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.placeholder}>
+              <Ionicons name="image-outline" size={64} color="#4A6FA5" />
+              <Text style={styles.placeholderText}>No photo</Text>
+            </View>
+          )}
+          {photoLoading && (
+            <ActivityIndicator
+              style={styles.spinner}
+              size="large"
+              color="#61DAFB"
+            />
+          )}
+        </View>
+
+        {/* Unsplash Attribution */}
+        {photoCredit && (
+          <Text style={styles.attribution}>
+            Photo by {photoCredit} on Unsplash
+          </Text>
         )}
+
+        {/* Country Card */}
+        <CountryCard countryName={extractCountry(trip.destination)} />
 
         <View style={styles.content}>
           <Text style={styles.title}>{trip.title}</Text>
@@ -130,9 +182,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0A1628',
   },
+  heroContainer: {
+    width: '100%',
+    height: 250,
+  },
   heroImage: {
     width: '100%',
     height: 250,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   placeholder: {
     width: '100%',
@@ -145,6 +203,20 @@ const styles = StyleSheet.create({
     color: '#4A6FA5',
     marginTop: 8,
     fontSize: 16,
+  },
+  spinner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  attribution: {
+    color: '#4A6FA5',
+    fontSize: 11,
+    textAlign: 'right',
+    paddingHorizontal: 16,
+    paddingTop: 4,
   },
   content: {
     padding: 24,
@@ -227,11 +299,5 @@ const styles = StyleSheet.create({
     color: '#61DAFB',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  errorText: {
-    color: '#8B95A5',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 40,
   },
 });
