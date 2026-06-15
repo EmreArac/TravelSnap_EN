@@ -1,12 +1,23 @@
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { TripCard } from '@/components/TripCard';
 import { useTrips } from '@/context/TripContext';
-import { Link, useRouter } from 'expo-router';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useCallback, useMemo } from 'react';
+import { ActivityIndicator, FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+
+const CARD_HEIGHT = 280;
 
 export default function HomeScreen() {
   const { trips, loading } = useTrips();
   const router = useRouter();
+
+  const sortedTrips = useMemo(() => {
+    return [...trips].sort((a, b) => b.rating - a.rating);
+  }, [trips]);
+
+  const handleTripPress = useCallback((id: string) => {
+    router.push(`/trip/${id}`);
+  }, [router]);
 
   if (loading) {
     return (
@@ -21,18 +32,20 @@ export default function HomeScreen() {
       <ScreenHeader title="My Trips" />
 
       <FlatList
-        data={trips}
+        data={sortedTrips}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        getItemLayout={(_, index) => ({
+          length: CARD_HEIGHT,
+          offset: CARD_HEIGHT * index,
+          index,
+        })}
+        initialNumToRender={10}
+        maxToRenderPerBatch={8}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS === 'android'}
         renderItem={({ item }) => (
-          <Link
-            href={{ pathname: '/trip/[id]', params: { id: item.id } }}
-            asChild
-          >
-            <Pressable>
-              <TripCard {...item} />
-            </Pressable>
-          </Link>
+          <TripCard trip={item} onPress={handleTripPress} />
         )}
         ListEmptyComponent={
           <Text style={styles.empty}>No trips yet. Add your first trip!</Text>

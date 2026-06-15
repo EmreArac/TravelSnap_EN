@@ -1,7 +1,8 @@
 import { UNSPLASH_ACCESS_KEY, UNSPLASH_BASE_URL } from "@/constants/api";
 import { useFetch } from "@/hooks/useFetch";
 import { UnsplashResponse } from "@/types/unsplash";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { StyleSheet, Text, View } from "react-native";
 
 interface DestinationCardProps {
   city: string;
@@ -30,6 +31,9 @@ export function DestinationCard({ city }: DestinationCardProps) {
       <Image
         source={{ uri: photo.urls.regular }}
         style={styles.image}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        transition={200}
       />
       <View style={styles.overlay}>
         <Text style={styles.cityName}>{city}</Text>
@@ -54,7 +58,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
   },
   overlay: {
     position: "absolute",

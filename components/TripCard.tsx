@@ -3,21 +3,28 @@ import RatingStars from '@/components/RatingStars';
 import { Colors } from '@/constants/Colors';
 import type { Trip } from '@/types/trip';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-export interface TripCardProps extends Trip {
-  onDelete?: () => void;
+export interface TripCardProps {
+  trip: Trip;
+  onPress: (id: string) => void;
 }
 
-export function TripCard({ title, destination, date, rating, imageUri, galleryUris, onDelete }: TripCardProps) {
+export const TripCard = React.memo(function TripCard({ trip, onPress }: TripCardProps) {
+  const { title, destination, date, rating, imageUri, galleryUris, id } = trip;
+
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={() => onPress(id)}>
       {/* Fotoğraf */}
       {imageUri && (
         <Image
           source={{ uri: imageUri }}
           style={styles.cardImage}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={200}
         />
       )}
 
@@ -32,8 +39,8 @@ export function TripCard({ title, destination, date, rating, imageUri, galleryUr
       <View style={styles.cardContent}>
         <View style={styles.header}>
           <Ionicons name="location" size={20} color={Colors.accent} />
-          <View style={{ marginLeft: 8 }}>
-            <Text style={styles.title}>{title}</Text>
+          <View style={styles.headerText}>
+            <Text style={styles.title} numberOfLines={1}>{title}</Text>
             <Text style={styles.destination}>{destination}</Text>
           </View>
         </View>
@@ -44,16 +51,10 @@ export function TripCard({ title, destination, date, rating, imageUri, galleryUr
         </View>
 
         <RatingStars rating={rating} />
-
-        {onDelete && (
-          <Pressable style={styles.deleteBtn} onPress={onDelete}>
-            <Text style={styles.deleteBtnText}>Delete</Text>
-          </Pressable>
-        )}
       </View>
-    </View>
+    </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {
@@ -98,6 +99,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  headerText: {
+    marginLeft: 8,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -117,17 +121,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.primary,
     marginLeft: 6,
-  },
-  deleteBtn: {
-    marginTop: 12,
-    backgroundColor: Colors.accent + '33',
-    borderRadius: 12,
-    padding: 8,
-    alignItems: 'center',
-  },
-  deleteBtnText: {
-    color: Colors.accent,
-    fontWeight: 'bold',
-    fontSize: 13,
   },
 });

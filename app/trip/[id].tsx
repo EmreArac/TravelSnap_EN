@@ -9,11 +9,11 @@ import { useFetch } from '@/hooks/useFetch';
 import { UnsplashResponse } from '@/types/unsplash';
 import { extractCountry } from '@/utils/destination';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -101,7 +101,10 @@ export default function TripDetail() {
             <Image
               source={{ uri: heroUri }}
               style={styles.heroImage}
-              resizeMode="cover"
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={300}
+              placeholder={{ blurhash: 'LGF5]+Yk^6#M@-5c,1J5@[or[Q6.' }}
             />
           ) : (
             <View style={styles.placeholder}>

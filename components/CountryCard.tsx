@@ -1,7 +1,8 @@
 import { RESTCOUNTRIES_BASE_URL } from "@/constants/api";
 import { useFetch } from "@/hooks/useFetch";
 import { Country } from "@/types/country";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { StyleSheet, Text, View } from "react-native";
 
 interface CountryCardProps {
   countryName: string;
@@ -26,6 +27,9 @@ export function CountryCard({ countryName }: CountryCardProps) {
       <Image
         source={{ uri: country.flags.png }}
         style={styles.flag}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        transition={200}
       />
       <View style={styles.info}>
         <Text style={styles.name}>{country.name.common}</Text>
