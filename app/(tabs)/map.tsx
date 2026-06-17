@@ -5,7 +5,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import MapView, { Callout, Marker } from 'react-native-maps';
+import MapView, { Callout, Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
 const DEFAULT_REGION = {
   latitude: 52.2297,
@@ -77,6 +77,7 @@ export default function MapScreen() {
       <MapView
         ref={mapRef}
         style={styles.map}
+        provider={PROVIDER_DEFAULT}
         initialRegion={initialRegion}
       >
         {tripsWithCoords.map(trip => (
