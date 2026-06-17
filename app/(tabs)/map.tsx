@@ -5,7 +5,6 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import MapView, { Callout, Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
 const DEFAULT_REGION = {
   latitude: 52.2297,
@@ -14,11 +13,26 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.1,
 };
 
+let MapView: any = null;
+let Marker: any = null;
+let Callout: any = null;
+let PROVIDER_DEFAULT: any = null;
+
+try {
+  const maps = require('react-native-maps');
+  MapView = maps.default;
+  Marker = maps.Marker;
+  Callout = maps.Callout;
+  PROVIDER_DEFAULT = maps.PROVIDER_DEFAULT;
+} catch (e) {
+  // react-native-maps not available
+}
+
 export default function MapScreen() {
   const { location, error, loading } = useLocation();
   const { trips } = useTrips();
   const router = useRouter();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
 
   const tripsWithCoords = useMemo(
     () => trips.filter(t => t.coordinates),
@@ -26,8 +40,9 @@ export default function MapScreen() {
   );
 
   useEffect(() => {
+    if (!mapRef.current) return;
     const coords = tripsWithCoords.map(t => t.coordinates!);
-    if (coords.length === 0 || !mapRef.current) return;
+    if (coords.length === 0) return;
 
     if (coords.length === 1) {
       mapRef.current.animateToRegion({
@@ -59,6 +74,14 @@ export default function MapScreen() {
         <Pressable style={styles.button} onPress={() => Linking.openSettings()}>
           <Text style={styles.buttonText}>Open Settings</Text>
         </Pressable>
+      </View>
+    );
+  }
+
+  if (!MapView) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>Map is not available on this platform.</Text>
       </View>
     );
   }
