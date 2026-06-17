@@ -5,6 +5,7 @@ import { saveImageToTrip } from '@/utils/imageStorage';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -79,7 +80,21 @@ export default function AddTripForm() {
 
   const onSubmit = async (data: TripFormData) => {
     try {
-      await addTrip(data);
+      let coordinates: { latitude: number; longitude: number } | undefined;
+
+      try {
+        const results = await Location.geocodeAsync(data.destination);
+        if (results.length > 0) {
+          coordinates = {
+            latitude: results[0].latitude,
+            longitude: results[0].longitude,
+          };
+        }
+      } catch {
+        // Geocoding failed (no internet etc.) — trip still saves
+      }
+
+      await addTrip({ ...data, coordinates });
       reset();
       router.back();
     } catch (err) {

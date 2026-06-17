@@ -10,7 +10,9 @@ import { UnsplashResponse } from '@/types/unsplash';
 import { extractCountry } from '@/utils/destination';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import * as Location from 'expo-location';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -27,6 +29,9 @@ export default function TripDetail() {
   const router = useRouter();
   const { isFavorite, toggleFavorite, isLoading } = useFavorites();
 
+  const [address, setAddress] = useState<string | null>(null);
+  const [addressLoading, setAddressLoading] = useState(false);
+
   const trip = trips.find((t) => t.id === id);
   const favorite = trip ? isFavorite(trip.id) : false;
 
@@ -40,6 +45,23 @@ export default function TripDetail() {
       ? { headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` } }
       : undefined
   );
+
+  useEffect(() => {
+    if (!trip?.coordinates) return;
+    setAddressLoading(true);
+    Location.reverseGeocodeAsync(trip.coordinates)
+      .then((results) => {
+        if (results.length > 0) {
+          const addr = results[0];
+          const parts = [addr.street, addr.city, addr.country].filter(Boolean);
+          setAddress(parts.join(', '));
+        }
+      })
+      .catch(() => {
+        // Reverse geocoding failed — silently ignore
+      })
+      .finally(() => setAddressLoading(false));
+  }, [trip?.coordinates]);
 
   if (!trip) {
     return (
@@ -138,6 +160,17 @@ export default function TripDetail() {
             <Ionicons name="location-outline" size={16} color="#8B95A5" />
             <Text style={styles.destination}>{trip.destination}</Text>
           </View>
+
+          {/* Reverse geocoded address */}
+          {addressLoading && (
+            <ActivityIndicator size="small" color="#61DAFB" style={{ marginBottom: 8 }} />
+          )}
+          {address && !addressLoading && (
+            <View style={styles.row}>
+              <Ionicons name="map-outline" size={14} color="#8B95A5" />
+              <Text style={styles.addressText}>{address}</Text>
+            </View>
+          )}
 
           <View style={styles.row}>
             <Ionicons name="calendar-outline" size={14} color="#8B95A5" />
@@ -239,6 +272,11 @@ const styles = StyleSheet.create({
   destination: {
     fontSize: 16,
     color: '#8B95A5',
+  },
+  addressText: {
+    fontSize: 13,
+    color: '#61DAFB',
+    flexShrink: 1,
   },
   date: {
     fontSize: 14,
