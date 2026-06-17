@@ -43,5 +43,3 @@ app-example
 /android
 
 package-lock.json
-
-constants/api.ts
